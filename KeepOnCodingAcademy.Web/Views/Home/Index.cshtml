@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@model KeepOnCodingAcademy.Web.Models.CodeRunModel
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+        @using (Html.BeginForm("RunCode", "Home", FormMethod.Post))
+    {
+        @Html.TextBoxFor(model => model.Code)
+        @Html.ValidationMessageFor(model => model.Code)
+        <button type="submit">Run</button>
+    }
+
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
