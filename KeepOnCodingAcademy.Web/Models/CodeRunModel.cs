@@ -6,5 +6,11 @@ namespace KeepOnCodingAcademy.Web.Models
     {
         [Required]
         public string? Code { get; set; }
+
+        //[Required]
+        public string? Language { get; set; }
+
+        //[Required]
+        public string? QuestionNumber { get; set; }
     }
 }

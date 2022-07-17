@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContextPool<AppDbContext>(options => options.UseSqlServer("data source=DESKTOP-5PNODQF\\SQLEXPRESS;initial catalog=KeepOnCodingAcademy;trusted_connection=true"));
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
