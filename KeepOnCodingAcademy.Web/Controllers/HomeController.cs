@@ -21,17 +21,26 @@ namespace KeepOnCodingAcademy.Web.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
+        
         public IActionResult Index()
         {
+            List<Question> questionsList = new List<Question>();
+            questionsList.Add(new Question { Id = 1, Prompt = "P1" });
+            questionsList.Add(new Question { Id = 2, Prompt = "P2" });
+            questionsList.Add(new Question { Id = 3, Prompt = "P3" });
+            //questionsList.AddRange(_questionRepository.GetAllQuestions());
+
+            ViewBag.QuestionList = questionsList;
             return View();
         }
 
+
         [HttpPost]
-        public async Task<ActionResult> RunCode(CodeRunModel model)
+        public async void RunCode(CodeRunModel model)
         {
             model.QuestionNumber = "1";
             model.Language = "python";
-            
+
             //var qs = _questionRepository.GetAllQuestions();
             //await OnGet();
 
@@ -46,19 +55,22 @@ namespace KeepOnCodingAcademy.Web.Controllers
                 var runCodeResultModel = JsonConvert.DeserializeObject<RunCodeResultModel>(resultContent);
             }
 
-            return View("Index", model);
+            ViewBag.Success = "True";
         }
 
+        
         public IActionResult Privacy()
         {
             return View();
         }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
 
         public async Task OnGet()
         {

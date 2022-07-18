@@ -1,4 +1,6 @@
-﻿@{
+﻿@using KeepOnCodingAcademy.DataAccess.Models
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -13,6 +15,16 @@
         @Html.ValidationMessageFor(model => model.Code)
         <button type="submit">Run</button>
     }
+
+    <h3>Passing Data From Controller to View using ViewBag</h3>  
+
+    <ul>
+        @foreach (var question in ViewBag.QuestionList)
+        {
+            <li>Prompt @question.Id: @question.Prompt</li>
+        }
+    </ul>
+    <h3>Success? @ViewBag.Success</h3>
 
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>

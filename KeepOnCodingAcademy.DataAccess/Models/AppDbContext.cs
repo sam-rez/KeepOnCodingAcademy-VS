@@ -11,5 +11,8 @@ namespace KeepOnCodingAcademy.DataAccess.Models
         }
 
         public DbSet<Question> Questions { get; set; }
+        public DbSet<QuestionCategory> QuestionCategories { get; set; }
+        public DbSet<QuestionDifficulty> QuestionDifficulties { get; set; }
+
     }
 }
