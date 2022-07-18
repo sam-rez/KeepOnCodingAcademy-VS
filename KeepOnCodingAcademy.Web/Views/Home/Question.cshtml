@@ -5,8 +5,9 @@
 
 @model KeepOnCodingAcademy.Web.Models.CodeRunModel
 
-<h1>Question</h1>
+<h4>@ViewBag.Question.Id. @ViewBag.Question.Title</h4>
 
+<h6>@ViewBag.Question.Prompt</h6>
     @using (Html.BeginForm("RunCode", "Home", FormMethod.Post))
 {
     <select name="language">

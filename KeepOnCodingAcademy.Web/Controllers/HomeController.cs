@@ -34,6 +34,7 @@ namespace KeepOnCodingAcademy.Web.Controllers
         {
             //Get Question
             var question = _questionRepository.GetQuestion(Int32.Parse(id));
+            ViewBag.Question = question;
             return View();
         }
 
@@ -48,12 +49,20 @@ namespace KeepOnCodingAcademy.Web.Controllers
             var json = JsonConvert.SerializeObject(model);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
+            var runCodeResultModel = new RunCodeResultModel();
+
             if (ModelState.IsValid)
             {
+                //TODO: Create Docker Container
+
                 var result = await client.PostAsync("https://localhost:7278/CodeExecution", data);
                 string resultContent = result.Content.ReadAsStringAsync().Result;
-                var runCodeResultModel = JsonConvert.DeserializeObject<RunCodeResultModel>(resultContent);
+                runCodeResultModel = JsonConvert.DeserializeObject<RunCodeResultModel>(resultContent);
+
+                //TODO: Teardown Docker Container
             }
+
+            //TODO: Save Results
 
             ViewBag.Success = "True";
         }
