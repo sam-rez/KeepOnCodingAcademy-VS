@@ -1,0 +1,21 @@
+﻿
+@{
+    ViewData["Title"] = "Question";
+}
+
+@model KeepOnCodingAcademy.Web.Models.CodeRunModel
+
+<h1>Question</h1>
+
+    @using (Html.BeginForm("RunCode", "Home", FormMethod.Post))
+{
+    <select name="language">
+        <option value="1">Python</option>
+        <option value="2">JavaScript</option>
+        <option value="3">Java</option>
+    </select>
+
+    @Html.TextAreaFor(model => model.Code)
+    @Html.ValidationMessageFor(model => model.Code)
+    <button type="submit">Run</button>
+}

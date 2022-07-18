@@ -4,24 +4,15 @@
     ViewData["Title"] = "Home Page";
 }
 
-@model KeepOnCodingAcademy.Web.Models.CodeRunModel
-
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-
-        @using (Html.BeginForm("RunCode", "Home", FormMethod.Post))
-    {
-        @Html.TextAreaFor(model => model.Code)
-        @Html.ValidationMessageFor(model => model.Code)
-        <button type="submit">Run</button>
-    }
-
-    <h3>Passing Data From Controller to View using ViewBag</h3>  
+    <h1 class="display-4">Questions List</h1>
 
     <ul>
         @foreach (var question in ViewBag.QuestionList)
         {
-            <li>Prompt @question.Id: @question.Prompt</li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-route-id="@question.Id" asp-action="Question">Question @question.Id: @question.Title</a>
+            </li>
         }
     </ul>
     <h3>Success? @ViewBag.Success</h3>

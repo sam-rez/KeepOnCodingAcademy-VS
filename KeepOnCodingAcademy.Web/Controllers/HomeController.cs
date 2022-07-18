@@ -24,13 +24,16 @@ namespace KeepOnCodingAcademy.Web.Controllers
         
         public IActionResult Index()
         {
-            List<Question> questionsList = new List<Question>();
-            questionsList.Add(new Question { Id = 1, Prompt = "P1" });
-            questionsList.Add(new Question { Id = 2, Prompt = "P2" });
-            questionsList.Add(new Question { Id = 3, Prompt = "P3" });
-            //questionsList.AddRange(_questionRepository.GetAllQuestions());
+            var questionsList = _questionRepository.GetAllQuestions();
 
             ViewBag.QuestionList = questionsList;
+            return View();
+        }
+
+        public IActionResult Question(string id)
+        {
+            //Get Question
+            var question = _questionRepository.GetQuestion(Int32.Parse(id));
             return View();
         }
 
@@ -40,9 +43,6 @@ namespace KeepOnCodingAcademy.Web.Controllers
         {
             model.QuestionNumber = "1";
             model.Language = "python";
-
-            //var qs = _questionRepository.GetAllQuestions();
-            //await OnGet();
 
             HttpClient client = new HttpClient();
             var json = JsonConvert.SerializeObject(model);
