@@ -5,6 +5,8 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text;
+using Docker.DotNet;
+using Docker.DotNet.Models;
 
 namespace KeepOnCodingAcademy.Web.Controllers
 {
@@ -14,14 +16,15 @@ namespace KeepOnCodingAcademy.Web.Controllers
         private readonly IQuestionRepository _questionRepository;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public HomeController(ILogger<HomeController> logger, IQuestionRepository questionRepository, IHttpClientFactory httpClientFactory)
+        public HomeController(ILogger<HomeController> logger, IQuestionRepository questionRepository, 
+                                IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _questionRepository = questionRepository;
             _httpClientFactory = httpClientFactory;
         }
 
-        
+
         public IActionResult Index()
         {
             var questionsList = _questionRepository.GetAllQuestions();
@@ -40,31 +43,110 @@ namespace KeepOnCodingAcademy.Web.Controllers
 
 
         [HttpPost]
-        public async void RunCode(CodeRunModel model)
+        public async Task<IActionResult> RunCode(CodeRunModel model)
         {
             model.QuestionNumber = "1";
             model.Language = "python";
+            RunCodeResultModel runCodeResultModel;
 
-            HttpClient client = new HttpClient();
-            var json = JsonConvert.SerializeObject(model);
-            var data = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var runCodeResultModel = new RunCodeResultModel();
-
-            if (ModelState.IsValid)
+            try
             {
-                //TODO: Create Docker Container
+                HttpClient client = new HttpClient();
+                var json = JsonConvert.SerializeObject(model);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var result = await client.PostAsync("https://localhost:7278/CodeExecution", data);
-                string resultContent = result.Content.ReadAsStringAsync().Result;
-                runCodeResultModel = JsonConvert.DeserializeObject<RunCodeResultModel>(resultContent);
+                runCodeResultModel = new RunCodeResultModel();
 
-                //TODO: Teardown Docker Container
+                if (ModelState.IsValid)
+                {
+                    //TODO: Create Docker Container
+                    DockerClient dockerClient = new DockerClientConfiguration().CreateClient();
+
+                    var createContainerResponse = await dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters()
+                        {
+                            Image = "codeexecution",
+                            HostConfig = new HostConfig
+                            {
+                                PortBindings = new Dictionary<string, IList<PortBinding>>
+                                                {
+                                                    {
+                                                        "80" , new List<PortBinding>
+                                                                    {
+                                                                        new PortBinding { HostIP ="0.0.0.0" }
+                                                                    }
+                                                    }
+
+                                                },
+                            },
+                            ExposedPorts = new Dictionary<string, EmptyStruct>
+                                        {
+                                                {
+                                                    "80", new EmptyStruct()
+                                                }
+                                        }
+                    });
+
+                    string containerId = createContainerResponse.ID;
+
+                    //Start Container
+                    var started = await dockerClient.Containers.StartContainerAsync(
+                        containerId,
+                        new ContainerStartParameters()
+                        );
+
+                    //Get Port
+
+
+                    Thread.Sleep(1000);
+
+                    //Call To CodeExecution API
+                    var result = await client.PostAsync("http://localhost:5000/CodeExecution", data);
+                    string resultContent = await result.Content.ReadAsStringAsync();
+                    runCodeResultModel = JsonConvert.DeserializeObject<RunCodeResultModel>(resultContent);
+
+
+                    //Stop Container
+                    await dockerClient.Containers.StopContainerAsync(
+                        containerId,
+                        new ContainerStopParameters
+                        {
+                            WaitBeforeKillSeconds = 15,
+                        },
+                        CancellationToken.None);
+
+                    //Kill Container
+                    //await dockerClient.Containers.KillContainerAsync(
+                    //    containerId,
+                    //    new ContainerKillParameters
+                    //    {                   
+                    //    },
+                    //    CancellationToken.None);
+
+
+                    //Delete Container
+                    await dockerClient.Containers.RemoveContainerAsync(
+                        containerId,
+                        new ContainerRemoveParameters
+                        {
+                        },
+                        CancellationToken.None);
+
+
+                    //TODO: Save Results
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
             }
 
-            //TODO: Save Results
 
             ViewBag.Success = "True";
+
+            return Ok();
         }
 
         
