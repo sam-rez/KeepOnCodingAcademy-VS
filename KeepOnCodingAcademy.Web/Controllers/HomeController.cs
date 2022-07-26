@@ -95,12 +95,30 @@ namespace KeepOnCodingAcademy.Web.Controllers
                         );
 
                     //Get Port
+                    IList <ContainerListResponse> containers = await dockerClient.Containers.ListContainersAsync(
+                            new ContainersListParameters()
+                            {
+                            });
 
 
+                    var container = containers.Where(e => e.ID == containerId).FirstOrDefault();
+                    var portNumber = 0;
+
+                    if (container.Ports[0].PrivatePort == 80)
+                    {
+                        portNumber = container.Ports[0].PublicPort;
+                    }
+                    else
+                    {
+                        portNumber = container.Ports[1].PublicPort;
+                    }
+
+
+                    //Sleep so container can get ready to receive post
                     Thread.Sleep(1000);
 
                     //Call To CodeExecution API
-                    var result = await client.PostAsync("http://localhost:5000/CodeExecution", data);
+                    var result = await client.PostAsync($"http://localhost:{portNumber}/CodeExecution", data);
                     string resultContent = await result.Content.ReadAsStringAsync();
                     runCodeResultModel = JsonConvert.DeserializeObject<RunCodeResultModel>(resultContent);
 
@@ -139,10 +157,9 @@ namespace KeepOnCodingAcademy.Web.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return null;
+                _logger.LogError(ex.Message);
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
-
 
             ViewBag.Success = "True";
 
